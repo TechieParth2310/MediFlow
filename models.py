@@ -78,7 +78,7 @@ class Doctor:
     def get_all_verified(cursor, limit=None, offset=0):
         """Get all verified doctors"""
         query = """
-            SELECT d.*, u.email 
+            SELECT d.*, u.email, u.id as user_id
             FROM doctors d
             JOIN users u ON d.user_id = u.id
             WHERE d.is_verified = 1 AND u.is_active = 1
@@ -93,7 +93,7 @@ class Doctor:
     def search(cursor, search_term=None, specialization=None):
         """Search doctors"""
         query = """
-            SELECT d.*, u.email 
+            SELECT d.*, u.email, u.id as user_id
             FROM doctors d
             JOIN users u ON d.user_id = u.id
             WHERE d.is_verified = 1 AND u.is_active = 1

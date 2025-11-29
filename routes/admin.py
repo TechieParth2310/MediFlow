@@ -46,7 +46,8 @@ def dashboard():
             cursor.execute("""
                     SELECT 
                         d.id, d.full_name, d.specialization, d.registration_number,
-                        d.qualification, d.experience_years, u.email, u.created_at
+                        d.qualification, d.experience_years, u.email, u.created_at,
+                        u.id as user_id
                     FROM doctors d
                     JOIN users u ON d.user_id = u.id
                     WHERE d.is_verified = 0
@@ -79,7 +80,7 @@ def manage_doctors():
                 doctors = Doctor.get_all_verified(cursor)
             elif status_filter == 'pending':
                 cursor.execute("""
-                    SELECT d.*, u.email, u.created_at
+                    SELECT d.*, u.email, u.created_at, u.id as user_id
                     FROM doctors d
                     JOIN users u ON d.user_id = u.id
                     WHERE d.is_verified = 0
@@ -88,7 +89,7 @@ def manage_doctors():
                 doctors = cursor.fetchall()
             else:
                 cursor.execute("""
-                    SELECT d.*, u.email, u.created_at
+                    SELECT d.*, u.email, u.created_at, u.id as user_id
                     FROM doctors d
                     JOIN users u ON d.user_id = u.id
                     ORDER BY u.created_at DESC
@@ -154,7 +155,7 @@ def manage_patients():
     try:
         with get_db_cursor(admin_bp.config) as cursor:
             cursor.execute("""
-                SELECT p.*, u.email, u.created_at
+                SELECT p.*, u.email, u.created_at, u.id as user_id
                 FROM patients p
                 JOIN users u ON p.user_id = u.id
                 ORDER BY u.created_at DESC
