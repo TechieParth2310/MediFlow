@@ -69,8 +69,13 @@ class Doctor:
 
     @staticmethod
     def get_by_id(cursor, doctor_id):
-        """Get doctor by ID"""
-        query = "SELECT * FROM doctors WHERE id = ?"
+        """Get doctor by ID with user info"""
+        query = """
+            SELECT d.*, u.email, u.id as user_id
+            FROM doctors d
+            JOIN users u ON d.user_id = u.id
+            WHERE d.id = ?
+        """
         cursor.execute(query, (doctor_id,))
         return cursor.fetchone()
 
@@ -162,8 +167,13 @@ class Patient:
 
     @staticmethod
     def get_by_id(cursor, patient_id):
-        """Get patient by ID"""
-        query = "SELECT * FROM patients WHERE id = ?"
+        """Get patient by ID with user info"""
+        query = """
+            SELECT p.*, u.email, u.id as user_id
+            FROM patients p
+            JOIN users u ON p.user_id = u.id
+            WHERE p.id = ?
+        """
         cursor.execute(query, (patient_id,))
         return cursor.fetchone()
 

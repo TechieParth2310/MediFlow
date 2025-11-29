@@ -54,6 +54,11 @@ def dashboard():
                     ORDER BY u.created_at DESC
                 """)
             pending_doctors = cursor.fetchall()
+            # Convert datetime strings back to objects
+            for doctor in pending_doctors:
+                if isinstance(doctor['created_at'], str):
+                    doctor['created_at'] = datetime.strptime(
+                        doctor['created_at'], '%Y-%m-%d %H:%M:%S')
 
             return render_template(
                 'admin/dashboard.html',
@@ -78,6 +83,11 @@ def manage_doctors():
 
             if status_filter == 'verified':
                 doctors = Doctor.get_all_verified(cursor)
+                # Convert datetime strings back to objects
+                for doctor in doctors:
+                    if isinstance(doctor['created_at'], str):
+                        doctor['created_at'] = datetime.strptime(
+                            doctor['created_at'], '%Y-%m-%d %H:%M:%S')
             elif status_filter == 'pending':
                 cursor.execute("""
                     SELECT d.*, u.email, u.created_at, u.id as user_id
@@ -87,6 +97,11 @@ def manage_doctors():
                     ORDER BY u.created_at DESC
                 """)
                 doctors = cursor.fetchall()
+                # Convert datetime strings back to objects
+                for doctor in doctors:
+                    if isinstance(doctor['created_at'], str):
+                        doctor['created_at'] = datetime.strptime(
+                            doctor['created_at'], '%Y-%m-%d %H:%M:%S')
             else:
                 cursor.execute("""
                     SELECT d.*, u.email, u.created_at, u.id as user_id
@@ -95,6 +110,11 @@ def manage_doctors():
                     ORDER BY u.created_at DESC
                 """)
                 doctors = cursor.fetchall()
+                # Convert datetime strings back to objects
+                for doctor in doctors:
+                    if isinstance(doctor['created_at'], str):
+                        doctor['created_at'] = datetime.strptime(
+                            doctor['created_at'], '%Y-%m-%d %H:%M:%S')
 
             return render_template(
                 'admin/doctors.html',
@@ -161,6 +181,11 @@ def manage_patients():
                 ORDER BY u.created_at DESC
             """)
             patients = cursor.fetchall()
+            # Convert datetime strings back to objects
+            for patient in patients:
+                if isinstance(patient['created_at'], str):
+                    patient['created_at'] = datetime.strptime(
+                        patient['created_at'], '%Y-%m-%d %H:%M:%S')
 
             return render_template(
                 'admin/patients.html',
@@ -205,6 +230,17 @@ def manage_appointments():
                     query + " ORDER BY a.appointment_date DESC, a.appointment_time DESC")
 
             appointments = cursor.fetchall()
+            # Convert datetime strings back to objects
+            for appt in appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d')
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
+                if isinstance(appt['created_at'], str):
+                    appt['created_at'] = datetime.strptime(
+                        appt['created_at'], '%Y-%m-%d %H:%M:%S')
 
             return render_template(
                 'admin/appointments.html',
