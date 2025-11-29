@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-container">
+    <div class="auth-box">
+        <h2>Login to Your Account 🔐</h2>
+        <p class="subtitle">Welcome back! Please select your account type and login.</p>
+
+        <!-- Role Selection Tabs -->
+        <div class="role-tabs">
+            <button class="role-tab active" data-role="patient">Patient</button>
+            <button class="role-tab" data-role="doctor">Doctor</button>
+            <button class="role-tab" data-role="admin">Admin</button>
+        </div>
+
+        <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+            <input type="hidden" name="role" id="selected-role" value="patient">
+
+            <div class="input-box">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-box">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit">Login</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account?</p>
+            <div class="register-links">
+                <a href="{{ url_for('auth.register_patient') }}" class="link">Register as Patient</a>
+                <span>|</span>
+                <a href="{{ url_for('auth.register_doctor') }}" class="link">Register as Doctor</a>
+            </div>
+            <p style="margin-top: 15px; font-size: 13px; color: #94a4c7;">
+                <strong>Admin Login:</strong> Select the Admin tab above and use admin credentials
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Role tab switching
+    const tabs = document.querySelectorAll('.role-tab');
+    const roleInput = document.getElementById('selected-role');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            roleInput.value = tab.dataset.role;
+        });
+    });
+</script>
+{% endblock %}

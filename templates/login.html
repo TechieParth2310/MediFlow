@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-box">
+
+    <h2>Login 🔐</h2>
+    <p class="subtitle">Sign in to access your secure dashboard.</p>
+
+    <form action="{{ url_for('login_db') }}" method="POST" class="auth-form">
+
+        <div class="input-box">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Enter username" required>
+        </div>
+
+        <div class="input-box">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+        </div>
+
+        <button class="btn" type="submit">Login</button>
+
+    </form>
+
+</div>
+
+{% endblock %}

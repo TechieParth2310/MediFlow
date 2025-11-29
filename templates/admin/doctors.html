@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Manage Doctors 👨‍⚕️</h1>
+        <p class="subtitle">View and manage all doctor accounts</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <a href="{{ url_for('admin.manage_doctors') }}"
+            class="filter-btn {% if not status_filter %}active{% endif %}">All Doctors</a>
+        <a href="{{ url_for('admin.manage_doctors', status='verified') }}"
+            class="filter-btn {% if status_filter == 'verified' %}active{% endif %}">Verified</a>
+        <a href="{{ url_for('admin.manage_doctors', status='pending') }}"
+            class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">Pending Verification</a>
+    </div>
+
+    {% if doctors %}
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Reg. Number</th>
+                    <th>Qualification</th>
+                    <th>Experience</th>
+                    <th>Status</th>
+                    <th>Registered</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td>#{{ doctor.id }}</td>
+                    <td>{{ doctor.full_name }}</td>
+                    <td>{{ doctor.email }}</td>
+                    <td>{{ doctor.specialization }}</td>
+                    <td>{{ doctor.registration_number }}</td>
+                    <td>{{ doctor.qualification or 'N/A' }}</td>
+                    <td>{{ doctor.experience_years or 'N/A' }} yrs</td>
+                    <td>
+                        {% if doctor.is_verified %}
+                        <span class="badge badge-completed">Verified</span>
+                        {% else %}
+                        <span class="badge badge-scheduled">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ doctor.created_at.strftime('%Y-%m-%d') if doctor.created_at else 'N/A' }}</td>
+                    <td class="action-btns">
+                        {% if doctor.is_verified %}
+                        <form method="POST" action="{{ url_for('admin.unverify_doctor', doctor_id=doctor.id) }}"
+                            style="display:inline;">
+                            <button type="submit" class="btn-icon btn-warning" title="Unverify">❌</button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('admin.verify_doctor', doctor_id=doctor.id) }}"
+                            style="display:inline;">
+                            <button type="submit" class="btn-icon btn-success" title="Verify">✓</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('admin.delete_user', user_id=doctor.user_id) }}"
+                            style="display:inline;"
+                            onsubmit="return confirm('Are you sure you want to delete this doctor?');">
+                            <button type="submit" class="btn-icon btn-danger" title="Delete">🗑️</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👨‍⚕️</div>
+        <h3>No Doctors Found</h3>
+        <p>{% if status_filter %}No {{ status_filter }} doctors{% else %}No doctors registered yet{% endif %}</p>
+    </div>
+    {% endif %}
+
+    <div class="action-buttons">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+{% endblock %}

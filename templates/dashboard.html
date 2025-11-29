@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-box">
+
+    <!-- Main Welcome -->
+    <div class="dash-welcome">
+        <h1>Welcome, {{ session['user'] }} 👋</h1>
+        <p>Your account is securely authenticated using hashed passwords and sessions.</p>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dash-grid">
+
+        <!-- Profile Card -->
+        <a href="#" class="dash-card dash-profile">
+            <h3>📝 Profile</h3>
+            <p>View and update your personal information.</p>
+        </a>
+
+        <!-- Security Card -->
+        <a href="#" class="dash-card dash-security">
+            <h3>🔐 Security</h3>
+            <p>Account protected with SHA256 hashing + Flask sessions.</p>
+        </a>
+
+        <!-- Settings Card -->
+        <a href="#" class="dash-card dash-settings">
+            <h3>⚙️ Settings</h3>
+            <p>Customize your app preferences and details.</p>
+        </a>
+
+        <!-- Logout Card -->
+        <a href="{{ url_for('logout') }}" class="dash-card dash-logout" style="border: 1px solid #ff6b6b;">
+            <h3>🚪 Logout</h3>
+            <p>Click to securely end your session.</p>
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

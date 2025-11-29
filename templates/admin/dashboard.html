@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <h1>Admin Dashboard 🎛️</h1>
+    <p class="subtitle">System Overview & Management</p>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👨‍⚕️</div>
+            <div class="stat-info">
+                <h3>{{ stats.total_doctors }}</h3>
+                <p>Total Doctors</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>{{ stats.verified_doctors }}</h3>
+                <p>Verified Doctors</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+                <h3>{{ stats.pending_doctors }}</h3>
+                <p>Pending Verification</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-info">
+                <h3>{{ stats.total_patients }}</h3>
+                <p>Total Patients</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <h3>{{ stats.total_appointments }}</h3>
+                <p>Total Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Doctor Verifications -->
+    {% if pending_doctors %}
+    <div class="section-card">
+        <div class="section-header">
+            <h2>⚠️ Pending Doctor Verifications</h2>
+            <span class="badge badge-scheduled">{{ pending_doctors|length }}</span>
+        </div>
+        <div class="verification-table">
+            {% for doctor in pending_doctors %}
+            <div class="verification-row">
+                <div class="doctor-info-col">
+                    <h4>{{ doctor.full_name }}</h4>
+                    <p>{{ doctor.specialization }}</p>
+                    <p class="small-text">{{ doctor.email }}</p>
+                </div>
+                <div class="doctor-credentials-col">
+                    <p><strong>Reg No:</strong> {{ doctor.registration_number }}</p>
+                    <p><strong>Qualification:</strong> {{ doctor.qualification }}</p>
+                    <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                </div>
+                <div class="doctor-actions-col">
+                    <form method="POST" action="{{ url_for('admin.verify_doctor', doctor_id=doctor.id) }}"
+                        style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-success">✓ Verify</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=doctor.user_id) }}"
+                        style="display:inline;" onsubmit="return confirm('Delete this doctor registration?');">
+                        <button type="submit" class="btn btn-sm btn-danger">✗ Reject</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Appointments -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>📋 Recent Appointments</h2>
+            <a href="{{ url_for('admin.manage_appointments') }}" class="btn btn-sm btn-primary">View All</a>
+        </div>
+        {% if recent_appointments %}
+        <div class="appointments-table">
+            {% for appt in recent_appointments[:5] %}
+            <div class="appointment-row">
+                <div class="appt-date-col">
+                    <div class="date">{{ appt.appointment_date.strftime('%b %d') }}</div>
+                    <div class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+                </div>
+                <div class="appt-patient-col">
+                    <h4>{{ appt.patient_name }}</h4>
+                </div>
+                <div class="appt-doctor-col">
+                    <h4>Dr. {{ appt.doctor_name }}</h4>
+                    <p>{{ appt.specialization }}</p>
+                </div>
+                <div class="appt-status-col">
+                    <span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-data">No appointments yet</p>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{{ url_for('admin.manage_doctors') }}" class="action-card">
+            <div class="action-icon">👨‍⚕️</div>
+            <h3>Manage Doctors</h3>
+            <p>View, verify, and manage doctor accounts</p>
+        </a>
+        <a href="{{ url_for('admin.manage_patients') }}" class="action-card">
+            <div class="action-icon">👤</div>
+            <h3>Manage Patients</h3>
+            <p>View and manage patient accounts</p>
+        </a>
+        <a href="{{ url_for('admin.manage_appointments') }}" class="action-card">
+            <div class="action-icon">📅</div>
+            <h3>View Appointments</h3>
+            <p>Monitor all appointment bookings</p>
+        </a>
+    </div>
+</div>
+
+{% endblock %}

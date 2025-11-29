@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "Doctor Appointment System" }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Professional doctor appointment booking and management system">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="app-body">
+    <!-- Background Layer -->
+    <div class="app-gradient-bg"></div>
+
+    <div class="app-container">
+        <!-- Header/Navigation -->
+        <header class="app-header glass-panel">
+            <div class="app-logo">
+                <span class="logo-icon">🏥</span>
+                <span class="logo-text">HealthCare+</span>
+            </div>
+
+            <nav class="app-nav">
+                <a href="{{ url_for('main.index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    Home
+                </a>
+
+                {% if not logged_in %}
+                <a href="{{ url_for('auth.login') }}"
+                    class="nav-link {% if '/auth/login' in request.path %}active{% endif %}">
+                    Login
+                </a>
+                <a href="{{ url_for('auth.register_patient') }}"
+                    class="nav-link {% if '/register' in request.path %}active{% endif %}">
+                    Register
+                </a>
+                {% else %}
+                {% if user_role == 'doctor' %}
+                <a href="{{ url_for('doctor.dashboard') }}"
+                    class="nav-link {% if '/doctor/dashboard' in request.path %}active{% endif %}">
+                    Dashboard
+                </a>
+                <a href="{{ url_for('doctor.appointments') }}"
+                    class="nav-link {% if '/doctor/appointments' in request.path %}active{% endif %}">
+                    Appointments
+                </a>
+                <a href="{{ url_for('doctor.schedule') }}"
+                    class="nav-link {% if '/doctor/schedule' in request.path %}active{% endif %}">
+                    Schedule
+                </a>
+                <a href="{{ url_for('doctor.profile') }}"
+                    class="nav-link {% if '/doctor/profile' in request.path %}active{% endif %}">
+                    Profile
+                </a>
+                {% elif user_role == 'patient' %}
+                <a href="{{ url_for('patient.dashboard') }}"
+                    class="nav-link {% if '/patient/dashboard' in request.path %}active{% endif %}">
+                    Dashboard
+                </a>
+                <a href="{{ url_for('patient.find_doctors') }}"
+                    class="nav-link {% if '/patient/doctors' in request.path %}active{% endif %}">
+                    Find Doctors
+                </a>
+                <a href="{{ url_for('patient.appointments') }}"
+                    class="nav-link {% if '/patient/appointments' in request.path %}active{% endif %}">
+                    My Appointments
+                </a>
+                <a href="{{ url_for('patient.profile') }}"
+                    class="nav-link {% if '/patient/profile' in request.path %}active{% endif %}">
+                    Profile
+                </a>
+                {% elif user_role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}"
+                    class="nav-link {% if '/admin/dashboard' in request.path %}active{% endif %}">
+                    Dashboard
+                </a>
+                <a href="{{ url_for('admin.manage_doctors') }}"
+                    class="nav-link {% if '/admin/doctors' in request.path %}active{% endif %}">
+                    Doctors
+                </a>
+                <a href="{{ url_for('admin.manage_patients') }}"
+                    class="nav-link {% if '/admin/patients' in request.path %}active{% endif %}">
+                    Patients
+                </a>
+                <a href="{{ url_for('admin.manage_appointments') }}"
+                    class="nav-link {% if '/admin/appointments' in request.path %}active{% endif %}">
+                    Appointments
+                </a>
+                {% endif %}
+
+                <div class="nav-user-menu">
+                    <span class="nav-user-name">👤 {{ user_name }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link logout-link">Logout</a>
+                </div>
+                {% endif %}
+
+                <button id="themeToggle" class="theme-btn">🌓</button>
+            </nav>
+        </header>
+
+        <!-- Flash Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, msg in messages %}
+        <div class="flash flash-{{ category }}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+
+
+        <!-- Main Content (Flex grows) -->
+        <main class="app-main">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+    </div> <!-- END .app-container -->
+
+    <!-- Sticky Footer -->
+    <footer class="app-footer">
+        <span>© 2025 HealthCare+ Doctor Appointment System</span>
+        <span class="footer-accent">Professional Healthcare Management 🏥</span>
+    </footer>
+    <script>
+        // Theme toggle
+        const toggle = document.getElementById("themeToggle");
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                document.body.classList.toggle("light");
+                localStorage.setItem("theme", document.body.classList.contains("light") ? "light" : "dark");
+            });
+
+            // Load saved preference
+            if (localStorage.getItem("theme") === "light") {
+                document.body.classList.add("light");
+            }
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+
+</html>

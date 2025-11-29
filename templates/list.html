@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Student List 📚</h2>
+<p class="page-desc">Here are all the students currently enrolled.</p>
+
+<div class="list-box">
+
+    <ul class="styled-list">
+        {% for student in students %}
+        <li class="list-item">
+            <span class="list-bullet"></span>
+            {{ student }}
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+{% endblock %}

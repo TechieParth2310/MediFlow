@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <h1>My Profile 👤</h1>
+
+    <div class="profile-container">
+        <!-- Basic Information (Read-Only) -->
+        <div class="profile-info-card">
+            <h3>Basic Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <p>{{ patient.full_name }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <p>{{ user_email }}</p>
+                </div>
+                {% if patient.date_of_birth %}
+                <div class="info-item">
+                    <label>Date of Birth</label>
+                    <p>{{ patient.date_of_birth.strftime('%B %d, %Y') }}</p>
+                </div>
+                {% endif %}
+                {% if patient.gender %}
+                <div class="info-item">
+                    <label>Gender</label>
+                    <p>{{ patient.gender.title() }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Editable Information -->
+        <div class="profile-edit-card">
+            <h3>Contact & Medical Information</h3>
+            <form method="POST" action="{{ url_for('patient.update_profile') }}" class="profile-form">
+                <div class="form-row">
+                    <div class="input-box">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" value="{{ patient.phone or '' }}"
+                            placeholder="+1234567890">
+                    </div>
+                    <div class="input-box">
+                        <label for="blood_group">Blood Group</label>
+                        <select name="blood_group" id="blood_group" class="form-select">
+                            <option value="">Select</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                            <option value="{{ bg }}" {% if patient.blood_group==bg %}selected{% endif %}>{{ bg }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-box">
+                    <label for="emergency_contact">Emergency Contact Number</label>
+                    <input type="tel" name="emergency_contact" id="emergency_contact"
+                        value="{{ patient.emergency_contact or '' }}" placeholder="+1234567890">
+                </div>
+
+                <div class="input-box">
+                    <label for="address">Address</label>
+                    <textarea name="address" id="address" rows="2"
+                        placeholder="Enter your address">{{ patient.address or '' }}</textarea>
+                </div>
+
+                <div class="input-box">
+                    <label for="medical_history">Medical History</label>
+                    <textarea name="medical_history" id="medical_history" rows="3"
+                        placeholder="Previous surgeries, chronic conditions, etc.">{{ patient.medical_history or '' }}</textarea>
+                </div>
+
+                <div class="input-box">
+                    <label for="allergies">Allergies</label>
+                    <textarea name="allergies" id="allergies" rows="2"
+                        placeholder="Drug allergies, food allergies, etc.">{{ patient.allergies or '' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

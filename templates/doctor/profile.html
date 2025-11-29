@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <h1>My Profile 👨‍⚕️</h1>
+
+    <div class="profile-container">
+        <!-- Read-Only Professional Information -->
+        <div class="profile-info-card">
+            <h3>Professional Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Full Name</label>
+                    <p>{{ doctor.full_name }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <p>{{ user_email }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Specialization</label>
+                    <p>{{ doctor.specialization }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Registration Number</label>
+                    <p>{{ doctor.registration_number }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Qualification</label>
+                    <p>{{ doctor.qualification or 'N/A' }}</p>
+                </div>
+                <div class="info-item">
+                    <label>Experience</label>
+                    <p>{{ doctor.experience_years or 'N/A' }} years</p>
+                </div>
+                <div class="info-item">
+                    <label>Verification Status</label>
+                    <p>
+                        {% if doctor.is_verified %}
+                        <span class="badge badge-completed">✓ Verified</span>
+                        {% else %}
+                        <span class="badge badge-scheduled">Pending Verification</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editable Information -->
+        <div class="profile-edit-card">
+            <h3>Editable Information</h3>
+            <form method="POST" action="{{ url_for('doctor.update_profile') }}" class="profile-form">
+                <div class="form-row">
+                    <div class="input-box">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" value="{{ doctor.phone or '' }}"
+                            placeholder="+1234567890">
+                    </div>
+                    <div class="input-box">
+                        <label for="consultation_fee">Consultation Fee ($)</label>
+                        <input type="number" name="consultation_fee" id="consultation_fee"
+                            value="{{ doctor.consultation_fee or '' }}" step="0.01" min="0" placeholder="50.00">
+                    </div>
+                </div>
+
+                <div class="input-box">
+                    <label for="address">Clinic/Hospital Address</label>
+                    <textarea name="address" id="address" rows="2"
+                        placeholder="Enter clinic address">{{ doctor.address or '' }}</textarea>
+                </div>
+
+                <div class="input-box">
+                    <label for="bio">Professional Bio</label>
+                    <textarea name="bio" id="bio" rows="4"
+                        placeholder="Tell patients about your expertise and experience...">{{ doctor.bio or '' }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

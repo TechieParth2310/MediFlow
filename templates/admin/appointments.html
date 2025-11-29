@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Manage Appointments 📅</h1>
+        <p class="subtitle">View and monitor all appointments</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <a href="{{ url_for('admin.manage_appointments') }}"
+            class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+        <a href="{{ url_for('admin.manage_appointments', status='scheduled') }}"
+            class="filter-btn {% if status_filter == 'scheduled' %}active{% endif %}">Scheduled</a>
+        <a href="{{ url_for('admin.manage_appointments', status='confirmed') }}"
+            class="filter-btn {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a>
+        <a href="{{ url_for('admin.manage_appointments', status='completed') }}"
+            class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="{{ url_for('admin.manage_appointments', status='cancelled') }}"
+            class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if appointments %}
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Specialization</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt in appointments %}
+                <tr>
+                    <td>#{{ appt.id }}</td>
+                    <td>{{ appt.appointment_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ appt.appointment_time.strftime('%I:%M %p') }}</td>
+                    <td>{{ appt.patient_name }}<br><span class="small-text">{{ appt.patient_email }}</span></td>
+                    <td>Dr. {{ appt.doctor_name }}<br><span class="small-text">{{ appt.doctor_email }}</span></td>
+                    <td>{{ appt.specialization }}</td>
+                    <td>{{ appt.reason_for_visit[:30] if appt.reason_for_visit else 'N/A' }}...</td>
+                    <td><span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span></td>
+                    <td>{{ appt.created_at.strftime('%Y-%m-%d') if appt.created_at else 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>No Appointments Found</h3>
+        <p>{% if status_filter %}No {{ status_filter }} appointments{% else %}No appointments yet{% endif %}</p>
+    </div>
+    {% endif %}
+
+    <div class="action-buttons">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+{% endblock %}

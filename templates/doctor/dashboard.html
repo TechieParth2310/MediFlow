@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, Dr. {{ session.full_name }}! 👨‍⚕️</h1>
+        <p class="subtitle">Manage your appointments and schedule efficiently</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+                <h3>{{ stats.total_appointments or 0 }}</h3>
+                <p>Total Appointments</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-success">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>{{ stats.completed or 0 }}</h3>
+                <p>Completed</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-warning">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <h3>{{ stats.scheduled or 0 }}</h3>
+                <p>Scheduled</p>
+            </div>
+        </div>
+
+        <div class="stat-card stat-danger">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <h3>{{ stats.cancelled or 0 }}</h3>
+                <p>Cancelled</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Appointments -->
+    <div class="dashboard-section">
+        <h2>Today's Appointments</h2>
+        {% if today_appointments %}
+        <div class="appointments-list">
+            {% for appt in today_appointments %}
+            <div class="appointment-card">
+                <div class="appt-time">
+                    <span class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</span>
+                </div>
+                <div class="appt-details">
+                    <h4>{{ appt.patient_name }}</h4>
+                    <p>{{ appt.reason_for_visit or 'General checkup' }}</p>
+                    <span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span>
+                </div>
+                <div class="appt-actions">
+                    <a href="{{ url_for('doctor.appointment_detail', appointment_id=appt.id) }}" class="btn btn-sm">View
+                        Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-data">No appointments scheduled for today.</p>
+        {% endif %}
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="dashboard-section">
+        <h2>Upcoming Appointments</h2>
+        {% if upcoming_appointments %}
+        <div class="appointments-list">
+            {% for appt in upcoming_appointments %}
+            <div class="appointment-card">
+                <div class="appt-date">
+                    <span class="date">{{ appt.appointment_date.strftime('%b %d') }}</span>
+                    <span class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</span>
+                </div>
+                <div class="appt-details">
+                    <h4>{{ appt.patient_name }}</h4>
+                    <p>{{ appt.reason_for_visit or 'General checkup' }}</p>
+                </div>
+                <div class="appt-actions">
+                    <a href="{{ url_for('doctor.appointment_detail', appointment_id=appt.id) }}"
+                        class="btn btn-sm">View</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">View All Appointments</a>
+        {% else %}
+        <p class="no-data">No upcoming appointments.</p>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{{ url_for('doctor.schedule') }}" class="action-card">
+                <span class="action-icon">⏰</span>
+                <span>Manage Schedule</span>
+            </a>
+            <a href="{{ url_for('doctor.appointments') }}" class="action-card">
+                <span class="action-icon">📋</span>
+                <span>All Appointments</span>
+            </a>
+            <a href="{{ url_for('doctor.profile') }}" class="action-card">
+                <span class="action-icon">👤</span>
+                <span>Edit Profile</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

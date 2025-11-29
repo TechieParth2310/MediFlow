@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <div class="page-header">
+        <h1>Manage My Schedule ⏰</h1>
+        <p class="subtitle">Set your availability for patient appointments</p>
+    </div>
+
+    <!-- Add Time Slot Form -->
+    <div class="schedule-add-section">
+        <h2>Add New Time Slot</h2>
+        <form method="POST" action="{{ url_for('doctor.add_time_slot') }}" class="schedule-form">
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="day_of_week">Day of Week *</label>
+                    <select name="day_of_week" id="day_of_week" required class="form-select">
+                        <option value="">Select Day</option>
+                        {% for day in days %}
+                        <option value="{{ day }}">{{ day }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="input-box">
+                    <label for="start_time">Start Time *</label>
+                    <input type="time" name="start_time" id="start_time" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="end_time">End Time *</label>
+                    <input type="time" name="end_time" id="end_time" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="slot_duration">Slot Duration (minutes)</label>
+                    <input type="number" name="slot_duration" id="slot_duration" value="30" min="15" max="120"
+                        step="15">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Time Slot</button>
+        </form>
+    </div>
+
+    <!-- Current Schedule -->
+    <div class="schedule-display-section">
+        <h2>Current Schedule</h2>
+
+        <div class="schedule-grid">
+            {% for day in days %}
+            <div class="day-schedule-card">
+                <div class="day-header">
+                    <h3>{{ day }}</h3>
+                    <span class="slot-count">{{ slots_by_day[day]|length }} slot(s)</span>
+                </div>
+
+                {% if slots_by_day[day] %}
+                <div class="slots-list">
+                    {% for slot in slots_by_day[day] %}
+                    <div class="slot-item {% if not slot.is_active %}inactive{% endif %}">
+                        <div class="slot-time">
+                            <span class="time-range">
+                                {{ slot.start_time.strftime('%I:%M %p') }} - {{ slot.end_time.strftime('%I:%M %p') }}
+                            </span>
+                            <span class="duration-badge">{{ slot.slot_duration }} min</span>
+                        </div>
+                        <div class="slot-actions">
+                            <form method="POST" action="{{ url_for('doctor.delete_time_slot', slot_id=slot.id) }}"
+                                style="display:inline;" onsubmit="return confirm('Delete this time slot?');">
+                                <button type="submit" class="btn-icon btn-danger" title="Delete">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-slots">No slots set for this day</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

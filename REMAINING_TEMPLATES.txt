@@ -1,0 +1,617 @@
+================================================================================
+DOCTOR APPOINTMENT SYSTEM - REMAINING TEMPLATES
+================================================================================
+Copy each template below into the specified file location.
+
+================================================================================
+FILE: templates/patient/doctor_profile.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="doctor-profile-container">
+        <div class="doctor-profile-header">
+            <div class="doctor-avatar-xl">👨‍⚕️</div>
+            <div class="doctor-header-info">
+                <h1>{{ doctor.full_name }}</h1>
+                <p class="specialization-large">{{ doctor.specialization }}</p>
+                <p class="qualification">{{ doctor.qualification }}</p>
+                {% if doctor.is_verified %}
+                <span class="verified-badge-lg">✓ Verified Doctor</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="doctor-profile-grid">
+            <div class="doctor-main">
+                <div class="info-section">
+                    <h3>About</h3>
+                    <p>{{ doctor.bio or 'No bio available' }}</p>
+                </div>
+
+                <div class="info-section">
+                    <h3>Professional Details</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <strong>Experience:</strong> {{ doctor.experience_years or 'N/A' }} years
+                        </div>
+                        <div class="detail-item">
+                            <strong>Registration:</strong> {{ doctor.registration_number }}
+                        </div>
+                        {% if doctor.consultation_fee %}
+                        <div class="detail-item">
+                            <strong>Consultation Fee:</strong> ${{ doctor.consultation_fee }}
+                        </div>
+                        {% endif %}
+                        {% if doctor.phone %}
+                        <div class="detail-item">
+                            <strong>Phone:</strong> {{ doctor.phone }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="booking-section">
+                    <h3>Book Appointment</h3>
+                    {% if available_dates %}
+                    <form method="POST" action="{{ url_for('patient.book_appointment') }}" class="booking-form">
+                        <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                        
+                        <div class="input-box">
+                            <label>Select Date</label>
+                            <select name="appointment_date" id="date-select" class="form-select" required>
+                                <option value="">Choose a date</option>
+                                {% for date_info in available_dates %}
+                                <option value="{{ date_info.date }}">
+                                    {{ date_info.date.strftime('%B %d, %Y') }} ({{ date_info.day }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label>Select Time Slot</label>
+                            <select name="appointment_time" class="form-select" required>
+                                <option value="">Select a date first</option>
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label>Reason for Visit</label>
+                            <input type="text" name="reason" placeholder="e.g., Chest pain, routine checkup" required>
+                        </div>
+
+                        <div class="input-box">
+                            <label>Symptoms (Optional)</label>
+                            <textarea name="symptoms" rows="3" placeholder="Describe your symptoms"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Book Appointment</button>
+                    </form>
+                    {% else %}
+                    <p class="no-data">No available slots at the moment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+const availableDates = {{ available_dates | tojson }};
+const dateSelect = document.getElementById('date-select');
+const timeSelect = document.querySelector('select[name="appointment_time"]');
+
+dateSelect.addEventListener('change', function() {
+    const selectedDate = this.value;
+    const dateInfo = availableDates.find(d => d.date === selectedDate);
+    
+    if (dateInfo && dateInfo.slots) {
+        timeSelect.innerHTML = '<option value="">Select time</option>';
+        dateInfo.slots.forEach(slot => {
+            const option = document.createElement('option');
+            option.value = slot.start_time;
+            option.textContent = `${slot.start_time} - ${slot.end_time}`;
+            timeSelect.appendChild(option);
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
+
+================================================================================
+FILE: templates/patient/appointments.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <h1>My Appointments 📋</h1>
+    
+    <div class="filter-bar">
+        <a href="{{ url_for('patient.appointments') }}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+        <a href="{{ url_for('patient.appointments', status='scheduled') }}" class="filter-btn {% if status_filter == 'scheduled' %}active{% endif %}">Scheduled</a>
+        <a href="{{ url_for('patient.appointments', status='completed') }}" class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="{{ url_for('patient.appointments', status='cancelled') }}" class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if appointments %}
+    <div class="appointments-table">
+        {% for appt in appointments %}
+        <div class="appointment-row">
+            <div class="appt-date-col">
+                <div class="date">{{ appt.appointment_date.strftime('%b %d') }}</div>
+                <div class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+            </div>
+            <div class="appt-doctor-col">
+                <h4>Dr. {{ appt.doctor_name }}</h4>
+                <p>{{ appt.specialization }}</p>
+            </div>
+            <div class="appt-reason-col">
+                <p>{{ appt.reason_for_visit or 'General checkup' }}</p>
+            </div>
+            <div class="appt-status-col">
+                <span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span>
+            </div>
+            <div class="appt-actions-col">
+                <a href="{{ url_for('patient.appointment_detail', appointment_id=appt.id) }}" class="btn btn-sm">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>No Appointments Found</h3>
+        <p>{% if status_filter %}No {{ status_filter }} appointments{% else %}You haven't booked any appointments yet{% endif %}</p>
+        <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-primary">Find Doctors</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/patient/appointment_detail.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="appointment-detail-container">
+        <h1>Appointment Details</h1>
+        
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3>Appointment Information</h3>
+                <span class="badge badge-{{ appointment.status }} badge-lg">{{ appointment.status.title() }}</span>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Doctor</label>
+                    <p>Dr. {{ appointment.doctor_name }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Specialization</label>
+                    <p>{{ appointment.specialization }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Date</label>
+                    <p>{{ appointment.appointment_date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Time</label>
+                    <p>{{ appointment.appointment_time.strftime('%I:%M %p') }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Consultation Fee</label>
+                    <p>${{ appointment.consultation_fee }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Reason for Visit</label>
+                    <p>{{ appointment.reason_for_visit or 'General checkup' }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if appointment.diagnosis or appointment.prescription %}
+        <div class="detail-card">
+            <h3>Medical Details</h3>
+            {% if appointment.diagnosis %}
+            <div class="medical-section">
+                <label>Diagnosis</label>
+                <p>{{ appointment.diagnosis }}</p>
+            </div>
+            {% endif %}
+            {% if appointment.prescription %}
+            <div class="medical-section">
+                <label>Prescription</label>
+                <p>{{ appointment.prescription }}</p>
+            </div>
+            {% endif %}
+            {% if appointment.notes %}
+            <div class="medical-section">
+                <label>Notes</label>
+                <p>{{ appointment.notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="action-buttons">
+            <a href="{{ url_for('patient.appointments') }}" class="btn btn-secondary">Back to Appointments</a>
+            {% if appointment.status == 'scheduled' %}
+            <button type="button" class="btn btn-danger" onclick="showCancelModal()">Cancel Appointment</button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if appointment.status == 'scheduled' %}
+    <div id="cancelModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>Cancel Appointment?</h3>
+            <p>Are you sure you want to cancel this appointment?</p>
+            <form method="POST" action="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}">
+                <div class="input-box">
+                    <label>Reason for Cancellation</label>
+                    <textarea name="reason" rows="3" required></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal()">No, Keep It</button>
+                    <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function showCancelModal() {
+    document.getElementById('cancelModal').style.display = 'flex';
+}
+function hideModal() {
+    document.getElementById('cancelModal').style.display = 'none';
+}
+</script>
+{% endblock %}
+
+================================================================================
+FILE: templates/patient/profile.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <h1>My Profile 👤</h1>
+    
+    <div class="profile-container">
+        <form method="POST" action="{{ url_for('patient.update_profile') }}" class="profile-form">
+            <div class="form-row">
+                <div class="input-box">
+                    <label>Full Name</label>
+                    <input type="text" value="{{ patient.full_name }}" disabled>
+                </div>
+                <div class="input-box">
+                    <label>Email</label>
+                    <input type="email" value="{{ user_email }}" disabled>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-box">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" value="{{ patient.phone or '' }}">
+                </div>
+                <div class="input-box">
+                    <label>Blood Group</label>
+                    <select name="blood_group" class="form-select">
+                        <option value="">Select</option>
+                        {% for bg in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                        <option value="{{ bg }}" {% if patient.blood_group == bg %}selected{% endif %}>{{ bg }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label>Emergency Contact</label>
+                <input type="tel" name="emergency_contact" value="{{ patient.emergency_contact or '' }}">
+            </div>
+
+            <div class="input-box">
+                <label>Address</label>
+                <textarea name="address" rows="2">{{ patient.address or '' }}</textarea>
+            </div>
+
+            <div class="input-box">
+                <label>Medical History</label>
+                <textarea name="medical_history" rows="3">{{ patient.medical_history or '' }}</textarea>
+            </div>
+
+            <div class="input-box">
+                <label>Allergies</label>
+                <textarea name="allergies" rows="2">{{ patient.allergies or '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/doctor/appointments.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <h1>My Appointments 📋</h1>
+    
+    <div class="filter-bar">
+        <a href="{{ url_for('doctor.appointments') }}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+        <a href="{{ url_for('doctor.appointments', status='scheduled') }}" class="filter-btn {% if status_filter == 'scheduled' %}active{% endif %}">Scheduled</a>
+        <a href="{{ url_for('doctor.appointments', status='completed') }}" class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="{{ url_for('doctor.appointments', status='cancelled') }}" class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if appointments %}
+    <div class="appointments-table">
+        {% for appt in appointments %}
+        <div class="appointment-row">
+            <div class="appt-date-col">
+                <div class="date">{{ appt.appointment_date.strftime('%b %d') }}</div>
+                <div class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+            </div>
+            <div class="appt-patient-col">
+                <h4>{{ appt.patient_name }}</h4>
+                <p>{{ appt.patient_phone }}</p>
+            </div>
+            <div class="appt-reason-col">
+                <p>{{ appt.reason_for_visit or 'General checkup' }}</p>
+            </div>
+            <div class="appt-status-col">
+                <span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span>
+            </div>
+            <div class="appt-actions-col">
+                <a href="{{ url_for('doctor.appointment_detail', appointment_id=appt.id) }}" class="btn btn-sm">View</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>No Appointments Found</h3>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/doctor/appointment_detail.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="appointment-detail-container">
+        <h1>Appointment Details</h1>
+        
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3>Patient Information</h3>
+                <span class="badge badge-{{ appointment.status }} badge-lg">{{ appointment.status.title() }}</span>
+            </div>
+            
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Patient Name</label>
+                    <p>{{ appointment.patient_name }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Phone</label>
+                    <p>{{ appointment.patient_phone }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Blood Group</label>
+                    <p>{{ appointment.blood_group or 'N/A' }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Date & Time</label>
+                    <p>{{ appointment.appointment_date.strftime('%B %d, %Y') }} at {{ appointment.appointment_time.strftime('%I:%M %p') }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Reason for Visit</label>
+                    <p>{{ appointment.reason_for_visit or 'General checkup' }}</p>
+                </div>
+                {% if appointment.symptoms %}
+                <div class="detail-item full-width">
+                    <label>Symptoms</label>
+                    <p>{{ appointment.symptoms }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-card">
+            <h3>Medical Details</h3>
+            <form method="POST" action="{{ url_for('doctor.update_appointment', appointment_id=appointment.id) }}">
+                <div class="input-box">
+                    <label>Diagnosis</label>
+                    <textarea name="diagnosis" rows="3">{{ appointment.diagnosis or '' }}</textarea>
+                </div>
+                <div class="input-box">
+                    <label>Prescription</label>
+                    <textarea name="prescription" rows="4">{{ appointment.prescription or '' }}</textarea>
+                </div>
+                <div class="input-box">
+                    <label>Notes</label>
+                    <textarea name="notes" rows="3">{{ appointment.notes or '' }}</textarea>
+                </div>
+
+                {% if appointment.status == 'scheduled' %}
+                <div class="input-box">
+                    <label>Update Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Keep current status</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">Back to Appointments</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/doctor/schedule.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <h1>My Schedule ⏰</h1>
+    
+    <div class="schedule-container">
+        <div class="add-slot-form">
+            <h3>Add Time Slot</h3>
+            <form method="POST" action="{{ url_for('doctor.add_time_slot') }}" class="inline-form">
+                <select name="day_of_week" required>
+                    <option value="">Select Day</option>
+                    {% for day in days %}
+                    <option value="{{ day }}">{{ day }}</option>
+                    {% endfor %}
+                </select>
+                <input type="time" name="start_time" required>
+                <input type="time" name="end_time" required>
+                <input type="number" name="slot_duration" placeholder="Duration (min)" value="30" min="15" max="120">
+                <button type="submit" class="btn btn-primary">Add Slot</button>
+            </form>
+        </div>
+
+        <div class="schedule-grid">
+            {% for day in days %}
+            <div class="day-schedule">
+                <h3>{{ day }}</h3>
+                {% if slots_by_day[day] %}
+                <div class="slots-list">
+                    {% for slot in slots_by_day[day] %}
+                    <div class="slot-item {% if not slot.is_active %}inactive{% endif %}">
+                        <span>{{ slot.start_time.strftime('%I:%M %p') }} - {{ slot.end_time.strftime('%I:%M %p') }}</span>
+                        <form method="POST" action="{{ url_for('doctor.delete_time_slot', slot_id=slot.id) }}" style="display:inline;">
+                            <button type="submit" class="btn-icon btn-danger">×</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-slots">No slots</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/doctor/profile.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <h1>My Profile 👨‍⚕️</h1>
+    
+    <div class="profile-container">
+        <div class="profile-info-readonly">
+            <h3>Professional Information</h3>
+            <div class="info-grid">
+                <div><strong>Name:</strong> {{ doctor.full_name }}</div>
+                <div><strong>Email:</strong> {{ user_email }}</div>
+                <div><strong>Specialization:</strong> {{ doctor.specialization }}</div>
+                <div><strong>Registration No:</strong> {{ doctor.registration_number }}</div>
+                <div><strong>Qualification:</strong> {{ doctor.qualification }}</div>
+                <div><strong>Experience:</strong> {{ doctor.experience_years }} years</div>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('doctor.update_profile') }}" class="profile-form">
+            <h3>Editable Information</h3>
+            
+            <div class="form-row">
+                <div class="input-box">
+                    <label>Phone Number</label>
+                    <input type="tel" name="phone" value="{{ doctor.phone or '' }}">
+                </div>
+                <div class="input-box">
+                    <label>Consultation Fee ($)</label>
+                    <input type="number" name="consultation_fee" value="{{ doctor.consultation_fee or '' }}" step="0.01">
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label>Clinic/Hospital Address</label>
+                <textarea name="address" rows="2">{{ doctor.address or '' }}</textarea>
+            </div>
+
+            <div class="input-box">
+                <label>Professional Bio</label>
+                <textarea name="bio" rows="4">{{ doctor.bio or '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/errors/404.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-content">
+        <h1 class="error-code">404</h1>
+        <h2>Page Not Found</h2>
+        <p>Sorry, the page you're looking for doesn't exist.</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">Go Home</a>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+FILE: templates/errors/500.html
+================================================================================
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-content">
+        <h1 class="error-code">500</h1>
+        <h2>Internal Server Error</h2>
+        <p>Something went wrong on our end. Please try again later.</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary">Go Home</a>
+    </div>
+</div>
+{% endblock %}
+
+================================================================================
+END OF TEMPLATES
+================================================================================

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <div class="doctor-profile-page">
+        <!-- Doctor Profile Header -->
+        <div class="doctor-profile-header">
+            <div class="doctor-avatar-xl">👨‍⚕️</div>
+            <div class="doctor-header-info">
+                <h1>{{ doctor.full_name }}</h1>
+                <p class="specialization-large">{{ doctor.specialization }}</p>
+                <p class="qualification">{{ doctor.qualification }}</p>
+                {% if doctor.is_verified %}
+                <span class="verified-badge-lg">✓ Verified Doctor</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="doctor-profile-content">
+            <!-- Doctor Information -->
+            <div class="doctor-info-section">
+                <div class="info-card">
+                    <h3>About</h3>
+                    <p>{{ doctor.bio or 'No bio available' }}</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Professional Details</h3>
+                    <div class="details-grid">
+                        {% if doctor.experience_years %}
+                        <div class="detail-item">
+                            <strong>Experience:</strong> {{ doctor.experience_years }} years
+                        </div>
+                        {% endif %}
+                        <div class="detail-item">
+                            <strong>Registration:</strong> {{ doctor.registration_number }}
+                        </div>
+                        {% if doctor.consultation_fee %}
+                        <div class="detail-item">
+                            <strong>Consultation Fee:</strong> ${{ doctor.consultation_fee }}
+                        </div>
+                        {% endif %}
+                        {% if doctor.phone %}
+                        <div class="detail-item">
+                            <strong>Phone:</strong> {{ doctor.phone }}
+                        </div>
+                        {% endif %}
+                        {% if doctor.address %}
+                        <div class="detail-item full-width">
+                            <strong>Address:</strong> {{ doctor.address }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Booking Section -->
+                <div class="booking-card">
+                    <h3>📅 Book Appointment</h3>
+                    {% if available_dates %}
+                    <form method="POST" action="{{ url_for('patient.book_appointment') }}" class="booking-form"
+                        id="booking-form">
+                        <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+
+                        <div class="input-box">
+                            <label for="appointment_date">Select Date *</label>
+                            <select name="appointment_date" id="appointment_date" class="form-select" required>
+                                <option value="">Choose a date</option>
+                                {% for date_info in available_dates %}
+                                <option value="{{ date_info.date }}" data-slots='{{ date_info.slots | tojson }}'>
+                                    {{ date_info.date.strftime('%B %d, %Y') }} ({{ date_info.day }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label for="appointment_time">Select Time Slot *</label>
+                            <select name="appointment_time" id="appointment_time" class="form-select" required>
+                                <option value="">Select a date first</option>
+                            </select>
+                        </div>
+
+                        <div class="input-box">
+                            <label for="reason">Reason for Visit *</label>
+                            <input type="text" name="reason" id="reason" placeholder="e.g., Chest pain, routine checkup"
+                                required>
+                        </div>
+
+                        <div class="input-box">
+                            <label for="symptoms">Symptoms (Optional)</label>
+                            <textarea name="symptoms" id="symptoms" rows="3"
+                                placeholder="Describe your symptoms..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">Book Appointment</button>
+                    </form>
+                    {% else %}
+                    <div class="no-slots-message">
+                        <p>😔 This doctor has no available slots at the moment.</p>
+                        <p>Please check back later or contact the doctor directly.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-secondary">← Back to Doctors</a>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+    // Handle time slot selection based on date
+    const dateSelect = document.getElementById('appointment_date');
+    const timeSelect = document.getElementById('appointment_time');
+
+    if (dateSelect && timeSelect) {
+        dateSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+
+            if (selectedOption.value) {
+                const slotsData = selectedOption.getAttribute('data-slots');
+
+                if (slotsData) {
+                    const slots = JSON.parse(slotsData);
+
+                    // Clear existing options
+                    timeSelect.innerHTML = '<option value="">Select time</option>';
+
+                    // Add new options
+                    slots.forEach(slot => {
+                        // Generate time slots within the range
+                        const startHour = parseInt(slot.start_time.split(':')[0]);
+                        const startMinute = parseInt(slot.start_time.split(':')[1]);
+                        const endHour = parseInt(slot.end_time.split(':')[0]);
+                        const endMinute = parseInt(slot.end_time.split(':')[1]);
+                        const duration = slot.slot_duration || 30;
+
+                        let currentHour = startHour;
+                        let currentMinute = startMinute;
+
+                        while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+                            const timeStr = String(currentHour).padStart(2, '0') + ':' + String(currentMinute).padStart(2, '0');
+                            const option = document.createElement('option');
+                            option.value = timeStr;
+
+                            // Format for display
+                            const displayHour = currentHour % 12 || 12;
+                            const ampm = currentHour >= 12 ? 'PM' : 'AM';
+                            option.textContent = displayHour + ':' + String(currentMinute).padStart(2, '0') + ' ' + ampm;
+
+                            timeSelect.appendChild(option);
+
+                            // Add duration
+                            currentMinute += duration;
+                            if (currentMinute >= 60) {
+                                currentHour += Math.floor(currentMinute / 60);
+                                currentMinute = currentMinute % 60;
+                            }
+                        }
+                    });
+                }
+            } else {
+                timeSelect.innerHTML = '<option value="">Select a date first</option>';
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <div class="appointment-detail-container">
+        <div class="detail-header-main">
+            <h1>Appointment Details</h1>
+            <span class="badge badge-{{ appointment.status }} badge-lg">{{ appointment.status.title() }}</span>
+        </div>
+
+        <!-- Patient Information -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3>👤 Patient Information</h3>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Patient Name</label>
+                    <p>{{ appointment.patient_name }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Phone</label>
+                    <p>{{ appointment.patient_phone or 'N/A' }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Email</label>
+                    <p>{{ appointment.patient_email or 'N/A' }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Blood Group</label>
+                    <p>{{ appointment.blood_group or 'N/A' }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Date of Birth</label>
+                    <p>{{ appointment.date_of_birth.strftime('%B %d, %Y') if appointment.date_of_birth else 'N/A' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Information -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3>📅 Appointment Information</h3>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Date</label>
+                    <p>{{ appointment.appointment_date.strftime('%B %d, %Y') }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Time</label>
+                    <p>{{ appointment.appointment_time.strftime('%I:%M %p') }}</p>
+                </div>
+                <div class="detail-item">
+                    <label>Duration</label>
+                    <p>{{ appointment.duration }} minutes</p>
+                </div>
+                <div class="detail-item full-width">
+                    <label>Reason for Visit</label>
+                    <p>{{ appointment.reason_for_visit or 'General checkup' }}</p>
+                </div>
+                {% if appointment.symptoms %}
+                <div class="detail-item full-width">
+                    <label>Symptoms</label>
+                    <p>{{ appointment.symptoms }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Medical Details Form -->
+        <div class="detail-card">
+            <div class="detail-header">
+                <h3>💊 Medical Details</h3>
+            </div>
+
+            <form method="POST" action="{{ url_for('doctor.update_appointment', appointment_id=appointment.id) }}">
+                <div class="input-box">
+                    <label for="diagnosis">Diagnosis</label>
+                    <textarea name="diagnosis" id="diagnosis" rows="3"
+                        placeholder="Enter diagnosis...">{{ appointment.diagnosis or '' }}</textarea>
+                </div>
+
+                <div class="input-box">
+                    <label for="prescription">Prescription</label>
+                    <textarea name="prescription" id="prescription" rows="4"
+                        placeholder="Enter prescription details...">{{ appointment.prescription or '' }}</textarea>
+                </div>
+
+                <div class="input-box">
+                    <label for="notes">Doctor's Notes</label>
+                    <textarea name="notes" id="notes" rows="3"
+                        placeholder="Additional notes...">{{ appointment.notes or '' }}</textarea>
+                </div>
+
+                {% if appointment.status in ['scheduled', 'confirmed'] %}
+                <div class="input-box">
+                    <label for="status">Update Status</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Keep current status ({{ appointment.status }})</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('doctor.appointments') }}" class="btn btn-secondary">Back to Appointments</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

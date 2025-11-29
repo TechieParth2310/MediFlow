@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Submit Your Details 📝</h2>
+<p class="page-desc">Fill out the form below and submit your information.</p>
+
+<form action="/submit" method="POST" class="auth-form">
+
+    <div class="input-box">
+        <label for="name">Full Name</label>
+        <input type="text" name="username" placeholder="Enter your name" required>
+    </div>
+
+    <div class="input-box">
+        <label for="age">Age</label>
+        <input type="number" name="age" placeholder="Enter your age" required>
+    </div>
+
+    <button type="submit" class="btn">Submit</button>
+</form>
+
+{% endblock %}

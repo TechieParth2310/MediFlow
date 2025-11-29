@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <h1>Find Doctors 🔍</h1>
+
+    <!-- Search and Filter -->
+    <div class="search-section">
+        <form method="GET" action="{{ url_for('patient.find_doctors') }}" class="search-form">
+            <div class="search-row">
+                <div class="search-input-wrapper">
+                    <input type="text" name="search" class="search-input"
+                        placeholder="Search by doctor name or specialization..." value="{{ search_term or '' }}">
+                </div>
+                <div class="filter-select-wrapper">
+                    <select name="specialization" class="form-select">
+                        <option value="">All Specializations</option>
+                        {% for spec in specializations %}
+                        <option value="{{ spec }}" {% if spec==selected_specialization %}selected{% endif %}>{{ spec }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Doctors Grid -->
+    {% if doctors %}
+    <div class="doctors-grid">
+        {% for doctor in doctors %}
+        <div class="doctor-card-detailed">
+            <div class="doctor-card-header">
+                <div class="doctor-avatar-lg">👨‍⚕️</div>
+                {% if doctor.is_verified %}
+                <span class="verified-badge">✓ Verified</span>
+                {% endif %}
+            </div>
+            <div class="doctor-card-body">
+                <h3>{{ doctor.full_name }}</h3>
+                <p class="specialization-text">{{ doctor.specialization }}</p>
+                <p class="qualification-text">{{ doctor.qualification or '' }}</p>
+
+                <div class="doctor-meta-grid">
+                    {% if doctor.experience_years %}
+                    <div class="meta-item">
+                        <span class="meta-icon">🎓</span>
+                        <span>{{ doctor.experience_years }} years exp.</span>
+                    </div>
+                    {% endif %}
+                    {% if doctor.consultation_fee %}
+                    <div class="meta-item">
+                        <span class="meta-icon">💰</span>
+                        <span>${{ doctor.consultation_fee }}</span>
+                    </div>
+                    {% endif %}
+                    {% if doctor.phone %}
+                    <div class="meta-item">
+                        <span class="meta-icon">📞</span>
+                        <span>{{ doctor.phone }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if doctor.bio %}
+                <p class="doctor-bio">{{ doctor.bio[:120] }}{% if doctor.bio|length > 120 %}...{% endif %}</p>
+                {% endif %}
+            </div>
+            <div class="doctor-card-footer">
+                <a href="{{ url_for('patient.doctor_profile', doctor_id=doctor.id) }}"
+                    class="btn btn-primary btn-block">Book Appointment</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>No Doctors Found</h3>
+        <p>Try adjusting your search criteria or browse all doctors</p>
+        <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-primary">View All Doctors</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

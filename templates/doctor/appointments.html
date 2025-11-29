@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="page-container">
+    <h1>My Appointments 📋</h1>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <a href="{{ url_for('doctor.appointments') }}"
+            class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+        <a href="{{ url_for('doctor.appointments', status='scheduled') }}"
+            class="filter-btn {% if status_filter == 'scheduled' %}active{% endif %}">Scheduled</a>
+        <a href="{{ url_for('doctor.appointments', status='confirmed') }}"
+            class="filter-btn {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a>
+        <a href="{{ url_for('doctor.appointments', status='completed') }}"
+            class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="{{ url_for('doctor.appointments', status='cancelled') }}"
+            class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+
+    {% if appointments %}
+    <div class="appointments-table">
+        {% for appt in appointments %}
+        <div class="appointment-row">
+            <div class="appt-date-col">
+                <div class="date">{{ appt.appointment_date.strftime('%b %d') }}</div>
+                <div class="year">{{ appt.appointment_date.strftime('%Y') }}</div>
+                <div class="time">{{ appt.appointment_time.strftime('%I:%M %p') }}</div>
+            </div>
+            <div class="appt-patient-col">
+                <h4>{{ appt.patient_name }}</h4>
+                <p>📞 {{ appt.patient_phone or 'N/A' }}</p>
+            </div>
+            <div class="appt-reason-col">
+                <p><strong>Reason:</strong> {{ appt.reason_for_visit or 'General checkup' }}</p>
+                {% if appt.symptoms %}
+                <p><strong>Symptoms:</strong> {{ appt.symptoms[:50] }}...</p>
+                {% endif %}
+            </div>
+            <div class="appt-status-col">
+                <span class="badge badge-{{ appt.status }}">{{ appt.status.title() }}</span>
+            </div>
+            <div class="appt-actions-col">
+                <a href="{{ url_for('doctor.appointment_detail', appointment_id=appt.id) }}"
+                    class="btn btn-sm btn-primary">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <h3>No Appointments Found</h3>
+        <p>{% if status_filter %}No {{ status_filter }} appointments{% else %}No appointments yet{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

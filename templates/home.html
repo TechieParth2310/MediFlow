@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="home-hero">
+    <h1 class="hero-title">Your Health, Our Priority 🏥</h1>
+    <p class="hero-subtitle">
+        Book appointments with top doctors, manage your health records,
+        and get the care you deserve - all in one place.
+    </p>
+
+    <div class="hero-buttons">
+        {% if not logged_in %}
+        <a href="{{ url_for('auth.register_patient') }}" class="btn btn-primary">Get Started as Patient</a>
+        <a href="{{ url_for('auth.register_doctor') }}" class="btn btn-secondary">Join as Doctor</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Admin Login</a>
+        {% else %}
+        {% if user_role == 'patient' %}
+        <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-primary">Book Appointment</a>
+        <a href="{{ url_for('patient.dashboard') }}" class="btn btn-secondary">My Dashboard</a>
+        {% elif user_role == 'doctor' %}
+        <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-primary">View Appointments</a>
+        <a href="{{ url_for('doctor.schedule') }}" class="btn btn-secondary">Manage Schedule</a>
+        {% elif user_role == 'admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Admin Dashboard</a>
+        <a href="{{ url_for('admin.manage_doctors') }}" class="btn btn-secondary">Manage Doctors</a>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <h2 class="section-title">Why Choose HealthCare+?</h2>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Easy Booking</h3>
+            <p>Book appointments with verified doctors in just a few clicks</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">⏰</div>
+            <h3>Real-time Availability</h3>
+            <p>See doctor's available slots and book instantly</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🔔</div>
+            <h3>Reminders</h3>
+            <p>Never miss an appointment with timely notifications</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>Medical Records</h3>
+            <p>Keep track of your prescriptions and medical history</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure & Private</h3>
+            <p>Your health data is encrypted and completely secure</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">💊</div>
+            <h3>Expert Doctors</h3>
+            <p>Access to verified specialists across all medical fields</p>
+        </div>
+    </div>
+</div>
+
+<!-- Specializations Section -->
+{% if specializations %}
+<div class="specializations-section">
+    <h2 class="section-title">Popular Specializations</h2>
+
+    <div class="specializations-grid">
+        {% for spec in specializations %}
+        <div class="spec-card">
+            <h4>{{ spec.specialization }}</h4>
+            <p>{{ spec.count }} doctor{{ 's' if spec.count != 1 else '' }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Doctors Section -->
+{% if featured_doctors %}
+<div class="featured-doctors-section">
+    <h2 class="section-title">Featured Doctors</h2>
+
+    <div class="doctors-grid">
+        {% for doctor in featured_doctors %}
+        <div class="doctor-card">
+            <div class="doctor-avatar">👨‍⚕️</div>
+            <h3>{{ doctor.full_name }}</h3>
+            <p class="doctor-spec">{{ doctor.specialization }}</p>
+            <p class="doctor-exp">{{ doctor.experience_years }} years experience</p>
+            {% if doctor.consultation_fee %}
+            <p class="doctor-fee">Fee: ${{ doctor.consultation_fee }}</p>
+            {% endif %}
+            {% if logged_in and user_role == 'patient' %}
+            <a href="{{ url_for('patient.doctor_profile', doctor_id=doctor.id) }}" class="btn btn-sm">Book Now</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if logged_in and user_role == 'patient' %}
+    <div class="text-center" style="margin-top: 25px;">
+        <a href="{{ url_for('patient.find_doctors') }}" class="btn btn-secondary">View All Doctors</a>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- CTA Section -->
+{% if not logged_in %}
+<div class="cta-section">
+    <h2>Ready to Get Started?</h2>
+    <p>Join thousands of patients and doctors using HealthCare+ for better healthcare management</p>
+    <div class="cta-buttons">
+        <a href="{{ url_for('auth.register_patient') }}" class="btn btn-primary btn-lg">Register as Patient</a>
+        <a href="{{ url_for('auth.register_doctor') }}" class="btn btn-outline btn-lg">Register as Doctor</a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

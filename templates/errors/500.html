@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="error-page">
+    <div class="error-content">
+        <h1 class="error-code">500</h1>
+        <h2>Internal Server Error</h2>
+        <p>Something went wrong on our end. Please try again later.</p>
+        <div class="error-actions">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">Go Home</a>
+            <a href="javascript:location.reload()" class="btn btn-secondary">Retry</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

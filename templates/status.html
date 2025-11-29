@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>User Status 🧍‍♂️</h2>
+<p class="page-desc">Below is the age-based status of the user.</p>
+
+<div class="status-card">
+    {% if age >= 18 %}
+        <p class="status-text adult">
+            {{ name }} is an adult 🧑
+        </p>
+    {% else %}
+        <p class="status-text minor">
+            {{ name }} is a minor 👶
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}

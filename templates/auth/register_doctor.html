@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-container">
+    <div class="auth-box register-box">
+        <h2>Register as Doctor 👨‍⚕️</h2>
+        <p class="subtitle">Join our platform and connect with patients</p>
+
+        <form action="{{ url_for('auth.register_doctor') }}" method="POST" class="auth-form">
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="full_name">Full Name *</label>
+                    <input type="text" id="full_name" name="full_name" placeholder="Dr. John Doe" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" placeholder="doctor@hospital.com" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="specialization">Specialization *</label>
+                    <input type="text" id="specialization" name="specialization" placeholder="e.g., Cardiologist"
+                        required>
+                </div>
+
+                <div class="input-box">
+                    <label for="registration_number">Medical Registration Number *</label>
+                    <input type="text" id="registration_number" name="registration_number" placeholder="MED12345"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="qualification">Qualification *</label>
+                    <input type="text" id="qualification" name="qualification" placeholder="MBBS, MD" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" placeholder="+1234567890" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="experience_years">Years of Experience</label>
+                    <input type="number" id="experience_years" name="experience_years" placeholder="10" min="0">
+                </div>
+
+                <div class="input-box">
+                    <label for="consultation_fee">Consultation Fee ($)</label>
+                    <input type="number" id="consultation_fee" name="consultation_fee" placeholder="50" step="0.01"
+                        min="0">
+                </div>
+            </div>
+
+            <div class="input-box">
+                <label for="address">Clinic/Hospital Address</label>
+                <textarea id="address" name="address" rows="2" placeholder="Enter clinic address"></textarea>
+            </div>
+
+            <div class="input-box">
+                <label for="bio">Professional Bio</label>
+                <textarea id="bio" name="bio" rows="3"
+                    placeholder="Brief description of your expertise and experience"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="input-box">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" placeholder="Min. 8 characters" required>
+                    <small>At least 8 characters, 1 uppercase, 1 lowercase, 1 number</small>
+                </div>
+
+                <div class="input-box">
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password"
+                        required>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <p>⚠️ Your account will be verified by our admin team before you can start accepting appointments.</p>
+            </div>
+
+            <button class="btn btn-primary btn-block" type="submit">Register</button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}" class="link">Login here</a></p>
+            <p>Are you a patient? <a href="{{ url_for('auth.register_patient') }}" class="link">Register as Patient</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
