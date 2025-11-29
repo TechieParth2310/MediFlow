@@ -194,12 +194,18 @@ class TimeSlot:
             start_time, '%H:%M').time() if isinstance(start_time, str) else start_time
         end = datetime.strptime(
             end_time, '%H:%M').time() if isinstance(end_time, str) else end_time
+
+        # Convert time objects to strings for SQLite storage
+        start_str = start.strftime(
+            '%H:%M:%S') if isinstance(start, time) else start
+        end_str = end.strftime('%H:%M:%S') if isinstance(end, time) else end
+
         query = """
             INSERT INTO time_slots (doctor_id, day_of_week, start_time, end_time, slot_duration)
             VALUES (?, ?, ?, ?, ?)
         """
         cursor.execute(query, (doctor_id, day_of_week,
-                       start, end, slot_duration))
+                       start_str, end_str, slot_duration))
         return cursor.lastrowid
 
     @staticmethod
@@ -256,6 +262,13 @@ class Appointment:
             appointment_date, '%Y-%m-%d').date() if isinstance(appointment_date, str) else appointment_date
         appt_time = datetime.strptime(
             appointment_time, '%H:%M').time() if isinstance(appointment_time, str) else appointment_time
+
+        # Convert time objects to strings for SQLite storage
+        appt_time_str = appt_time.strftime(
+            '%H:%M:%S') if isinstance(appt_time, time) else appt_time
+        appt_date_str = appt_date.strftime(
+            '%Y-%m-%d') if isinstance(appt_date, date) else appt_date
+
         query = """
             INSERT INTO appointments 
             (patient_id, doctor_id, appointment_date, appointment_time, duration, 
@@ -263,7 +276,7 @@ class Appointment:
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """
         cursor.execute(query, (
-            patient_id, doctor_id, appt_date, appt_time,
+            patient_id, doctor_id, appt_date_str, appt_time_str,
             kwargs.get('duration', 30), kwargs.get('reason_for_visit'),
             kwargs.get('symptoms')
         ))
@@ -346,6 +359,13 @@ class Appointment:
             appointment_date, '%Y-%m-%d').date() if isinstance(appointment_date, str) else appointment_date
         appt_time = datetime.strptime(
             appointment_time, '%H:%M').time() if isinstance(appointment_time, str) else appointment_time
+
+        # Convert time objects to strings for SQLite storage
+        appt_time_str = appt_time.strftime(
+            '%H:%M:%S') if isinstance(appt_time, time) else appt_time
+        appt_date_str = appt_date.strftime(
+            '%Y-%m-%d') if isinstance(appt_date, date) else appt_date
+
         query = """
             SELECT id FROM appointments 
             WHERE doctor_id = ? 
@@ -353,7 +373,7 @@ class Appointment:
             AND appointment_time = ?
             AND status NOT IN ('cancelled', 'no_show')
         """
-        cursor.execute(query, (doctor_id, appt_date, appt_time))
+        cursor.execute(query, (doctor_id, appt_date_str, appt_time_str))
         return cursor.fetchone() is not None
 
     @staticmethod

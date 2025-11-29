@@ -24,11 +24,27 @@ def dashboard():
             today_appointments = Appointment.get_by_doctor(
                 cursor, doctor_id, date_filter=today
             )
+            # Convert date/time strings back to objects
+            for appt in today_appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             # Get upcoming appointments
             upcoming_appointments = Appointment.get_by_doctor(
                 cursor, doctor_id, status='scheduled', limit=5
             )
+            # Convert date/time strings back to objects
+            for appt in upcoming_appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             # Get statistics
             cursor.execute("""
@@ -75,6 +91,14 @@ def appointments():
                 status=status_filter,
                 date_filter=date_filter
             )
+            # Convert date/time strings back to objects
+            for appt in appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             return render_template(
                 'doctor/appointments.html',
@@ -100,6 +124,17 @@ def appointment_detail(appointment_id):
             if not appointment or appointment['doctor_id'] != session.get('profile_id'):
                 flash('Appointment not found', 'error')
                 return redirect(url_for('doctor.appointments'))
+
+            # Convert date/time strings back to objects for template rendering
+            if isinstance(appointment['appointment_date'], str):
+                appointment['appointment_date'] = datetime.strptime(
+                    appointment['appointment_date'], '%Y-%m-%d').date()
+            if isinstance(appointment['appointment_time'], str):
+                appointment['appointment_time'] = datetime.strptime(
+                    appointment['appointment_time'], '%H:%M:%S').time()
+            if appointment['date_of_birth'] and isinstance(appointment['date_of_birth'], str):
+                appointment['date_of_birth'] = datetime.strptime(
+                    appointment['date_of_birth'], '%Y-%m-%d').date()
 
             return render_template(
                 'doctor/appointment_detail.html',
@@ -128,6 +163,14 @@ def update_appointment(appointment_id):
             if not appointment or appointment['doctor_id'] != session.get('profile_id'):
                 flash('Appointment not found', 'error')
                 return redirect(url_for('doctor.appointments'))
+
+            # Convert date/time strings back to objects
+            if isinstance(appointment['appointment_date'], str):
+                appointment['appointment_date'] = datetime.strptime(
+                    appointment['appointment_date'], '%Y-%m-%d').date()
+            if isinstance(appointment['appointment_time'], str):
+                appointment['appointment_time'] = datetime.strptime(
+                    appointment['appointment_time'], '%H:%M:%S').time()
 
             # Update medical info
             if diagnosis or prescription or notes:
@@ -187,8 +230,18 @@ def schedule():
         with get_db_cursor(doctor_bp.config) as cursor:
             doctor_id = session.get('profile_id')
             time_slots_rows = TimeSlot.get_by_doctor(cursor, doctor_id)
-            # Convert Row objects to dictionaries
-            time_slots = [dict(row) for row in time_slots_rows]
+            # Convert Row objects to dictionaries and parse time strings
+            time_slots = []
+            for row in time_slots_rows:
+                slot_dict = dict(row)
+                # Convert time strings back to time objects for template rendering
+                if isinstance(slot_dict['start_time'], str):
+                    slot_dict['start_time'] = datetime.strptime(
+                        slot_dict['start_time'], '%H:%M:%S').time()
+                if isinstance(slot_dict['end_time'], str):
+                    slot_dict['end_time'] = datetime.strptime(
+                        slot_dict['end_time'], '%H:%M:%S').time()
+                time_slots.append(slot_dict)
 
             # Group by day
             slots_by_day = {}
@@ -234,7 +287,13 @@ def add_time_slot():
             end_obj = datetime.strptime(end_time, '%H:%M').time()
 
             for slot in existing_slots:
-                if not (end_obj <= slot['start_time'] or start_obj >= slot['end_time']):
+                # Parse the slot times from the database (stored as strings)
+                slot_start = datetime.strptime(slot['start_time'], '%H:%M:%S').time(
+                ) if isinstance(slot['start_time'], str) else slot['start_time']
+                slot_end = datetime.strptime(slot['end_time'], '%H:%M:%S').time(
+                ) if isinstance(slot['end_time'], str) else slot['end_time']
+
+                if not (end_obj <= slot_start or start_obj >= slot_end):
                     flash('Time slot conflicts with existing schedule', 'error')
                     return redirect(url_for('doctor.schedule'))
 

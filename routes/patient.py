@@ -114,8 +114,18 @@ def doctor_profile(doctor_id):
 
             # Get doctor's time slots
             time_slots_rows = TimeSlot.get_by_doctor(cursor, doctor_id)
-            # Convert Row objects to dictionaries for JSON serialization
-            time_slots = [dict(row) for row in time_slots_rows]
+            # Convert Row objects to dictionaries and parse time strings
+            time_slots = []
+            for row in time_slots_rows:
+                slot_dict = dict(row)
+                # Convert time strings back to time objects
+                if isinstance(slot_dict['start_time'], str):
+                    slot_dict['start_time'] = datetime.strptime(
+                        slot_dict['start_time'], '%H:%M:%S').time()
+                if isinstance(slot_dict['end_time'], str):
+                    slot_dict['end_time'] = datetime.strptime(
+                        slot_dict['end_time'], '%H:%M:%S').time()
+                time_slots.append(slot_dict)
 
             # Get available dates (next 30 days)
             available_dates = []
@@ -253,6 +263,14 @@ def appointments():
             appointments = Appointment.get_by_patient(
                 cursor, patient_id, status=status_filter
             )
+            # Convert date/time strings back to objects
+            for appt in appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             return render_template(
                 'patient/appointments.html',
@@ -278,6 +296,17 @@ def appointment_detail(appointment_id):
                 flash('Appointment not found', 'error')
                 return redirect(url_for('patient.appointments'))
 
+            # Convert date/time strings back to objects for template rendering
+            if isinstance(appointment['appointment_date'], str):
+                appointment['appointment_date'] = datetime.strptime(
+                    appointment['appointment_date'], '%Y-%m-%d').date()
+            if isinstance(appointment['appointment_time'], str):
+                appointment['appointment_time'] = datetime.strptime(
+                    appointment['appointment_time'], '%H:%M:%S').time()
+            if appointment['date_of_birth'] and isinstance(appointment['date_of_birth'], str):
+                appointment['date_of_birth'] = datetime.strptime(
+                    appointment['date_of_birth'], '%Y-%m-%d').date()
+
             return render_template(
                 'patient/appointment_detail.html',
                 appointment=appointment,
@@ -302,6 +331,14 @@ def cancel_appointment(appointment_id):
             if not appointment or appointment['patient_id'] != session.get('profile_id'):
                 flash('Appointment not found', 'error')
                 return redirect(url_for('patient.appointments'))
+
+            # Convert date/time strings back to objects
+            if isinstance(appointment['appointment_date'], str):
+                appointment['appointment_date'] = datetime.strptime(
+                    appointment['appointment_date'], '%Y-%m-%d').date()
+            if isinstance(appointment['appointment_time'], str):
+                appointment['appointment_time'] = datetime.strptime(
+                    appointment['appointment_time'], '%H:%M:%S').time()
 
             # Check if appointment can be cancelled
             if appointment['status'] in ['completed', 'cancelled']:
