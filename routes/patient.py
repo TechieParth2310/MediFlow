@@ -138,10 +138,22 @@ def doctor_profile(doctor_id):
                 day_slots = [
                     slot for slot in time_slots if slot['day_of_week'] == day_name]
                 if day_slots:
+                    # Convert time objects to strings for JSON serialization
+                    serializable_slots = []
+                    for slot in day_slots:
+                        slot_copy = slot.copy()
+                        if isinstance(slot_copy['start_time'], time):
+                            slot_copy['start_time'] = slot_copy['start_time'].strftime(
+                                '%H:%M:%S')
+                        if isinstance(slot_copy['end_time'], time):
+                            slot_copy['end_time'] = slot_copy['end_time'].strftime(
+                                '%H:%M:%S')
+                        serializable_slots.append(slot_copy)
+
                     available_dates.append({
                         'date': check_date,
                         'day': day_name,
-                        'slots': day_slots
+                        'slots': serializable_slots
                     })
 
             return render_template(
