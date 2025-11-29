@@ -55,6 +55,7 @@ def dashboard():
                 """)
             pending_doctors = cursor.fetchall()
             # Convert datetime strings back to objects
+            pending_doctors = [dict(row) for row in pending_doctors]
             for doctor in pending_doctors:
                 if isinstance(doctor['created_at'], str):
                     doctor['created_at'] = datetime.strptime(
@@ -84,6 +85,7 @@ def manage_doctors():
             if status_filter == 'verified':
                 doctors = Doctor.get_all_verified(cursor)
                 # Convert datetime strings back to objects
+                doctors = [dict(row) for row in doctors]
                 for doctor in doctors:
                     if isinstance(doctor['created_at'], str):
                         doctor['created_at'] = datetime.strptime(
@@ -98,6 +100,7 @@ def manage_doctors():
                 """)
                 doctors = cursor.fetchall()
                 # Convert datetime strings back to objects
+                doctors = [dict(row) for row in doctors]
                 for doctor in doctors:
                     if isinstance(doctor['created_at'], str):
                         doctor['created_at'] = datetime.strptime(
@@ -111,6 +114,7 @@ def manage_doctors():
                 """)
                 doctors = cursor.fetchall()
                 # Convert datetime strings back to objects
+                doctors = [dict(row) for row in doctors]
                 for doctor in doctors:
                     if isinstance(doctor['created_at'], str):
                         doctor['created_at'] = datetime.strptime(
@@ -182,6 +186,7 @@ def manage_patients():
             """)
             patients = cursor.fetchall()
             # Convert datetime strings back to objects
+            patients = [dict(row) for row in patients]
             for patient in patients:
                 if isinstance(patient['created_at'], str):
                     patient['created_at'] = datetime.strptime(
@@ -231,6 +236,7 @@ def manage_appointments():
 
             appointments = cursor.fetchall()
             # Convert datetime strings back to objects
+            appointments = [dict(row) for row in appointments]
             for appt in appointments:
                 if isinstance(appt['appointment_date'], str):
                     appt['appointment_date'] = datetime.strptime(
