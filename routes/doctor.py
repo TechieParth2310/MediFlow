@@ -25,6 +25,7 @@ def dashboard():
                 cursor, doctor_id, date_filter=today
             )
             # Convert date/time strings back to objects
+            today_appointments = [dict(row) for row in today_appointments]
             for appt in today_appointments:
                 if isinstance(appt['appointment_date'], str):
                     appt['appointment_date'] = datetime.strptime(
@@ -38,6 +39,8 @@ def dashboard():
                 cursor, doctor_id, status='scheduled', limit=5
             )
             # Convert date/time strings back to objects
+            upcoming_appointments = [dict(row)
+                                     for row in upcoming_appointments]
             for appt in upcoming_appointments:
                 if isinstance(appt['appointment_date'], str):
                     appt['appointment_date'] = datetime.strptime(

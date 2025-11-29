@@ -23,11 +23,30 @@ def dashboard():
             upcoming_appointments = Appointment.get_by_patient(
                 cursor, patient_id, status='scheduled', limit=5
             )
+            # Convert date/time strings back to objects
+            upcoming_appointments = [dict(row)
+                                     for row in upcoming_appointments]
+            for appt in upcoming_appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             # Get recent appointments
             recent_appointments = Appointment.get_by_patient(
                 cursor, patient_id, limit=5
             )
+            # Convert date/time strings back to objects
+            recent_appointments = [dict(row) for row in recent_appointments]
+            for appt in recent_appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d').date()
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             # Get statistics
             cursor.execute("""
@@ -276,6 +295,7 @@ def appointments():
                 cursor, patient_id, status=status_filter
             )
             # Convert date/time strings back to objects
+            appointments = [dict(row) for row in appointments]
             for appt in appointments:
                 if isinstance(appt['appointment_date'], str):
                     appt['appointment_date'] = datetime.strptime(

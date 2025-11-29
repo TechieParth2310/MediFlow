@@ -41,6 +41,15 @@ def dashboard():
                 LIMIT 10
             """)
             recent_appointments = cursor.fetchall()
+            # Convert datetime strings back to objects
+            recent_appointments = [dict(row) for row in recent_appointments]
+            for appt in recent_appointments:
+                if isinstance(appt['appointment_date'], str):
+                    appt['appointment_date'] = datetime.strptime(
+                        appt['appointment_date'], '%Y-%m-%d')
+                if isinstance(appt['appointment_time'], str):
+                    appt['appointment_time'] = datetime.strptime(
+                        appt['appointment_time'], '%H:%M:%S').time()
 
             # Pending doctor verifications
             cursor.execute("""
