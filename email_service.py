@@ -19,6 +19,10 @@ class EmailService:
     def _send_email_async(self, to_email, subject, html_content, text_content):
         """Send email in background thread"""
         try:
+            print(f"📧 [Email Thread] Starting email send to {to_email}")
+            print(f"📧 [Email Thread] Server: {self.config.MAIL_SERVER}:{self.config.MAIL_PORT}")
+            print(f"📧 [Email Thread] Username: {self.config.MAIL_USERNAME}")
+            
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = self.config.MAIL_DEFAULT_SENDER
@@ -31,30 +35,45 @@ class EmailService:
             msg.attach(part2)
 
             # Send email
-            with smtplib.SMTP(self.config.MAIL_SERVER, self.config.MAIL_PORT) as server:
+            print(f"📧 [Email Thread] Connecting to SMTP server...")
+            with smtplib.SMTP(self.config.MAIL_SERVER, self.config.MAIL_PORT, timeout=30) as server:
+                print(f"📧 [Email Thread] Starting TLS...")
                 if self.config.MAIL_USE_TLS:
                     server.starttls()
+                print(f"📧 [Email Thread] Logging in...")
                 server.login(self.config.MAIL_USERNAME,
                              self.config.MAIL_PASSWORD)
+                print(f"📧 [Email Thread] Sending message...")
                 server.send_message(msg)
 
-            print(f"✅ Email sent to {to_email}: {subject}")
+            print(f"✅ Email sent successfully to {to_email}: {subject}")
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"❌ SMTP Authentication Error: {str(e)}")
+            print(f"   Check your MAIL_USERNAME and MAIL_PASSWORD")
+        except smtplib.SMTPException as e:
+            print(f"❌ SMTP Error: {str(e)}")
         except Exception as e:
             print(f"❌ Email failed to {to_email}: {str(e)}")
+            import traceback
+            traceback.print_exc()
 
     def send_email(self, to_email, subject, html_content, text_content):
         """Send email (async if enabled, else log only)"""
         if self.enabled:
             # Send in background thread to not block request
+            print(f"📧 [Email Service] Queuing email to {to_email}: {subject}")
             thread = threading.Thread(
                 target=self._send_email_async,
                 args=(to_email, subject, html_content, text_content)
             )
             thread.daemon = True
             thread.start()
+            print(f"📧 [Email Service] Email thread started for {to_email}")
         else:
             print(
                 f"📧 [Email Service Disabled] Would send to {to_email}: {subject}")
+            print(f"   MAIL_USERNAME: {self.config.MAIL_USERNAME or 'NOT SET'}")
+            print(f"   MAIL_PASSWORD: {'SET' if self.config.MAIL_PASSWORD else 'NOT SET'}")
 
     # =============================================
     # APPOINTMENT NOTIFICATIONS

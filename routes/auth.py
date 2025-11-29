@@ -188,9 +188,17 @@ def register_patient_post():
             # Send welcome email
             try:
                 email_service = get_email_service(auth_bp.config)
-                email_service.send_welcome_email(email, full_name, 'patient')
+                print(f"📧 Email service status: {'ENABLED ✅' if email_service.enabled else 'DISABLED (no credentials)'}")
+                if email_service.enabled:
+                    print(f"📧 Attempting to send welcome email to: {email}")
+                    email_service.send_welcome_email(email, full_name, 'patient')
+                    print(f"📧 Welcome email queued for: {email}")
+                else:
+                    print(f"⚠️ Email service disabled - MAIL_USERNAME or MAIL_PASSWORD not set")
             except Exception as e:
-                print(f"Welcome email error: {e}")
+                print(f"❌ Welcome email error: {e}")
+                import traceback
+                traceback.print_exc()
 
             flash('Registration successful! Please login.', 'success')
             return redirect(url_for('auth.login'))
