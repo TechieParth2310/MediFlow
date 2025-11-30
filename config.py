@@ -21,7 +21,7 @@ class Config:
     # Session Configuration
     SESSION_TYPE = 'filesystem'
     PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
-    SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+    SESSION_COOKIE_SECURE = False  # Set True in production with HTTPS
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
@@ -31,17 +31,21 @@ class Config:
 
     # File Upload Settings
     UPLOAD_FOLDER = 'static/uploads'
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB max file size
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
 
-    # Email Configuration (for notifications)
+    # Email Configuration (Render-friendly)
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.gmail.com'
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+    # IMPORTANT FIX — remove placeholder blocking
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+
+    # Default sender (should match Gmail account for deliverability)
     MAIL_DEFAULT_SENDER = os.environ.get(
-        'MAIL_DEFAULT_SENDER') or 'noreply@hospital.com'
+        "MAIL_DEFAULT_SENDER") or MAIL_USERNAME
 
     # Pagination
     APPOINTMENTS_PER_PAGE = 10
@@ -49,8 +53,8 @@ class Config:
 
     # Appointment Settings
     DEFAULT_SLOT_DURATION = 30  # minutes
-    BOOKING_ADVANCE_DAYS = 30  # How many days in advance can book
-    CANCELLATION_HOURS = 24  # Minimum hours before appointment to cancel
+    BOOKING_ADVANCE_DAYS = 30
+    CANCELLATION_HOURS = 24
 
 
 class DevelopmentConfig(Config):
@@ -63,7 +67,7 @@ class ProductionConfig(Config):
     """Production environment configuration"""
     DEBUG = False
     TESTING = False
-    SESSION_COOKIE_SECURE = True  # Require HTTPS
+    SESSION_COOKIE_SECURE = True  # HTTPS only
 
 
 class TestingConfig(Config):
