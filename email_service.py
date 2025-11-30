@@ -449,7 +449,7 @@ class EmailService:
 
     def send_welcome_email(self, email, name, role):
         """Send welcome email after registration"""
-        subject = f"Welcome to HealthCare+ - Your {role.title()} Account is Ready!"
+        subject = f"🎉 Successfully Registered on MediFlow - Welcome {name}!"
 
         html_content = f"""
         <html>
@@ -460,28 +460,37 @@ class EmailService:
                 .header {{ background: #4f7cff; color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }}
                 .content {{ background: #f9f9f9; padding: 30px; border: 1px solid #ddd; }}
                 .welcome-box {{ background: white; padding: 20px; margin: 20px 0; border-left: 4px solid #4f7cff; }}
+                .success-badge {{ background: #2ecc71; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block; margin: 10px 0; }}
                 .footer {{ background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>🎉 Welcome to HealthCare+!</h1>
+                    <h1>🎉 Welcome to MediFlow!</h1>
                 </div>
                 <div class="content">
                     <p>Dear {name},</p>
-                    <p>Thank you for registering with HealthCare+! Your {role} account has been created successfully.</p>
+                    <p><strong>You have successfully registered on MediFlow!</strong></p>
+                    <p>Your {role} account has been created and is ready to use.</p>
+                    
+                    <div class="success-badge">
+                        ✅ Registration Successful
+                    </div>
                     
                     <div class="welcome-box">
-                        {'<p><strong>Next Steps for Patients:</strong></p><ul><li>Browse our verified doctors</li><li>Book your first appointment</li><li>Manage your health records</li></ul>' if role == 'patient' else '<p><strong>Next Steps for Doctors:</strong></p><ul><li>Your account is under review for verification</li><li>Once verified, you can set your schedule</li><li>Start accepting patient appointments</li></ul>'}
+                        {'<p><strong>What you can do now:</strong></p><ul><li>Login to your account</li><li>Browse our verified doctors</li><li>Book your first appointment</li><li>Manage your health records</li></ul>' if role == 'patient' else '<p><strong>What happens next:</strong></p><ul><li>Your account is under review for verification</li><li>Once verified by admin, you can set your schedule</li><li>Start accepting patient appointments</li><li>Manage your consultations</li></ul>'}
                     </div>
+                    
+                    <p><strong>Ready to get started?</strong> Login to your MediFlow account now!</p>
                     
                     <p>If you have any questions, feel free to reach out to our support team.</p>
                     
-                    <p>Best regards,<br>The HealthCare+ Team</p>
+                    <p>Best regards,<br>The MediFlow Team</p>
                 </div>
                 <div class="footer">
-                    <p>HealthCare+ | Professional Healthcare Management</p>
+                    <p>MediFlow | Professional Healthcare Management System</p>
+                    <p>This is an automated message, please do not reply to this email.</p>
                 </div>
             </div>
         </body>
@@ -489,16 +498,29 @@ class EmailService:
         """
 
         text_content = f"""
-        WELCOME TO HealthCare+
+        SUCCESSFULLY REGISTERED ON MEDIFLOW
         
         Dear {name},
         
-        Thank you for registering! Your {role} account is ready.
+        You have successfully registered on MediFlow!
+        Your {role} account has been created and is ready to use.
         
-        {'Browse doctors and book your first appointment!' if role == 'patient' else 'Your account will be verified by admin before you can accept appointments.'}
+        ✅ Registration Successful
         
-        Welcome aboard!
-        HealthCare+ Team
+        {'What you can do now:' if role == 'patient' else 'What happens next:'}
+        {'- Login to your account' if role == 'patient' else '- Your account is under review'}
+        {'- Browse our verified doctors' if role == 'patient' else '- Once verified, set your schedule'}
+        {'- Book your first appointment' if role == 'patient' else '- Start accepting appointments'}
+        {'- Manage your health records' if role == 'patient' else '- Manage your consultations'}
+        
+        Ready to get started? Login to your MediFlow account now!
+        
+        Best regards,
+        The MediFlow Team
+        
+        ---
+        MediFlow | Professional Healthcare Management System
+        This is an automated message, please do not reply to this email.
         """
 
         self.send_email(email, subject, html_content, text_content)

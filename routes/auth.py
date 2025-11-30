@@ -188,17 +188,30 @@ def register_patient_post():
             # Send welcome email
             try:
                 email_service = get_email_service(auth_bp.config)
-                print(f"📧 Email service status: {'ENABLED ✅' if email_service.enabled else 'DISABLED (no credentials)'}")
+                print(f"\n{'='*60}")
+                print(f"📧 EMAIL SERVICE CHECK - Patient Registration")
+                print(f"{'='*60}")
+                print(f"📧 Email service status: {'ENABLED ✅' if email_service.enabled else 'DISABLED ❌ (no credentials)'}")
+                print(f"📧 MAIL_USERNAME: {auth_bp.config.MAIL_USERNAME or 'NOT SET'}")
+                print(f"📧 MAIL_PASSWORD: {'SET ✅' if auth_bp.config.MAIL_PASSWORD else 'NOT SET ❌'}")
+                print(f"📧 MAIL_SERVER: {auth_bp.config.MAIL_SERVER}")
+                print(f"📧 MAIL_PORT: {auth_bp.config.MAIL_PORT}")
+                
                 if email_service.enabled:
                     print(f"📧 Attempting to send welcome email to: {email}")
+                    print(f"📧 Patient name: {full_name}")
                     email_service.send_welcome_email(email, full_name, 'patient')
-                    print(f"📧 Welcome email queued for: {email}")
+                    print(f"📧 ✅ Welcome email queued successfully for: {email}")
+                    print(f"📧 Check Render logs for email send status (look for '✅ Email sent' or '❌ Email failed')")
                 else:
-                    print(f"⚠️ Email service disabled - MAIL_USERNAME or MAIL_PASSWORD not set")
+                    print(f"⚠️ ❌ Email service disabled - Cannot send welcome email")
+                    print(f"⚠️ Check Render environment variables: MAIL_USERNAME and MAIL_PASSWORD")
+                print(f"{'='*60}\n")
             except Exception as e:
-                print(f"❌ Welcome email error: {e}")
+                print(f"\n❌ CRITICAL: Welcome email error: {e}")
                 import traceback
                 traceback.print_exc()
+                print(f"{'='*60}\n")
 
             flash('Registration successful! Please login.', 'success')
             return redirect(url_for('auth.login'))
@@ -284,9 +297,22 @@ def register_doctor_post():
             # Send welcome email
             try:
                 email_service = get_email_service(auth_bp.config)
-                email_service.send_welcome_email(email, full_name, 'doctor')
+                print(f"\n{'='*60}")
+                print(f"📧 EMAIL SERVICE CHECK - Doctor Registration")
+                print(f"{'='*60}")
+                print(f"📧 Email service status: {'ENABLED ✅' if email_service.enabled else 'DISABLED ❌ (no credentials)'}")
+                
+                if email_service.enabled:
+                    print(f"📧 Attempting to send welcome email to: {email}")
+                    email_service.send_welcome_email(email, full_name, 'doctor')
+                    print(f"📧 ✅ Welcome email queued successfully for: {email}")
+                else:
+                    print(f"⚠️ ❌ Email service disabled - Cannot send welcome email")
+                print(f"{'='*60}\n")
             except Exception as e:
-                print(f"Welcome email error: {e}")
+                print(f"❌ Welcome email error: {e}")
+                import traceback
+                traceback.print_exc()
 
             flash('Registration successful! Your account will be verified by admin. You can login once verified.', 'success')
             return redirect(url_for('auth.login'))
